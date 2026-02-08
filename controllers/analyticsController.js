@@ -108,9 +108,7 @@ const trackLandingEvent = async (req, res, next) => {
     });
 
     // Update aggregate stats on LandingPage model for quick access
-    if (eventType === 'VISIT') {
-      await LandingPage.findByIdAndUpdate(landingPageId, { $inc: { views: 1 } });
-    } else if (eventType === 'CONVERSION' || eventType === 'LEAD') {
+    if (eventType === 'CONVERSION' || eventType === 'LEAD') {
       await LandingPage.findByIdAndUpdate(landingPageId, { $inc: { conversions: 1 } });
     }
 
