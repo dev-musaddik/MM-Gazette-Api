@@ -14,7 +14,7 @@ const createOrder = async (req, res, next) => {
   try {
     const { items, shippingAddress, deliveryCharge, paymentMethod } = req.body;
 
-    if (!items || items.length === 0) {
+    if (!items || items?.length === 0) {
       res.status(400);
       throw new Error('No order items provided');
     }
@@ -113,7 +113,7 @@ const createGuestOrder = async (req, res, next) => {
   try {
     const { items, shippingAddress, deliveryCharge, paymentMethod } = req.body;
 
-    if (!items || items.length === 0) {
+    if (!items || items?.length === 0) {
       res.status(400);
       throw new Error('No order items provided');
     }
@@ -202,7 +202,7 @@ const getUserOrders = async (req, res, next) => {
 
     res.json({
       success: true,
-      count: orders.length,
+      count: orders?.length,
       data: orders,
     });
   } catch (error) {
@@ -258,7 +258,7 @@ const getAllOrders = async (req, res, next) => {
 
     res.json({
       success: true,
-      count: orders.length,
+      count: orders?.length,
       totalRevenue,
       data: orders,
     });

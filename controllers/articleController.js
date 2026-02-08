@@ -21,7 +21,7 @@ const getAllArticles = async (req, res, next) => {
 
     res.json({
       success: true,
-      count: articles.length,
+      count: articles?.length,
       data: articles,
     });
   } catch (error) {

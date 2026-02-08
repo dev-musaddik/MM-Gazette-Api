@@ -31,7 +31,7 @@ const getAllLandingPages = async (req, res, next) => {
     
     res.json({
       success: true,
-      count: landingPages.length,
+      count: landingPages?.length,
       landingPages,
     });
   } catch (error) {

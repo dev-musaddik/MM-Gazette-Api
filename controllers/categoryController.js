@@ -8,7 +8,7 @@ exports.getAllCategories = async (req, res) => {
     const categories = await Category.find({ isActive: true });
     res.status(200).json({
       success: true,
-      count: categories.length,
+      count: categories?.length,
       data: categories
     });
   } catch (err) {

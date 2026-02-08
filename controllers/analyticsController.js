@@ -143,7 +143,7 @@ const getPublicDashboard = async (req, res, next) => {
       timestamp: dateFilter 
     });
     
-    const totalSessions = activeSessionIds.length;
+    const totalSessions = activeSessionIds?.length;
     
     // Find unique visitors (IPs) for these active sessions
     const uniqueVisitors = await Session.distinct('ipHash', { 
@@ -160,7 +160,7 @@ const getPublicDashboard = async (req, res, next) => {
       success: true,
       stats: {
         totalSessions,
-        uniqueVisitors: uniqueVisitors.length,
+        uniqueVisitors: uniqueVisitors?.length,
       },
       funnel: {
         views,
@@ -198,9 +198,9 @@ const getLandingDashboard = async (req, res, next) => {
     const events = await LandingPageEvent.find({ landingPageId: id, ...dateFilter }).sort({ timestamp: -1 });
     
     // Aggregations
-    const visits = events.filter(e => e.eventType === 'VISIT').length;
-    const clicks = events.filter(e => e.eventType === 'CTA_CLICK').length;
-    const leads = events.filter(e => e.eventType === 'LEAD' || e.eventType === 'CONVERSION').length;
+    const visits = events.filter(e => e.eventType === 'VISIT')?.length;
+    const clicks = events.filter(e => e.eventType === 'CTA_CLICK')?.length;
+    const leads = events.filter(e => e.eventType === 'LEAD' || e.eventType === 'CONVERSION')?.length;
     
     // Source breakdown
     const sources = {};
@@ -239,7 +239,7 @@ const getTrafficFlags = async (req, res, next) => {
     const flags = await TrafficFlag.find({}).sort({ timestamp: -1 }).limit(50);
     res.json({
       success: true,
-      count: flags.length,
+      count: flags?.length,
       data: flags
     });
   } catch (error) {

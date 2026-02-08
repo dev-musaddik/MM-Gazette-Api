@@ -8,7 +8,7 @@ exports.getAllBrands = async (req, res) => {
     const brands = await Brand.find({ isActive: true });
     res.status(200).json({
       success: true,
-      count: brands.length,
+      count: brands?.length,
       data: brands
     });
   } catch (err) {

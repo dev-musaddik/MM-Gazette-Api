@@ -69,7 +69,7 @@ const login = async (req, res, next) => {
         timestamp: new Date()
       });
       // Keep only last 10 logins
-      if (user.loginHistory.length > 10) {
+      if (user.loginHistory?.length > 10) {
         user.loginHistory = user.loginHistory.slice(-10);
       }
       await user.save();
@@ -185,7 +185,7 @@ const getAllUsers = async (req, res, next) => {
     
     res.json({
       success: true,
-      count: users.length,
+      count: users?.length,
       users,
     });
   } catch (error) {

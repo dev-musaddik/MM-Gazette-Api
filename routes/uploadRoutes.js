@@ -69,7 +69,7 @@ router.post('/', protect, admin, upload.single('image'), async (req, res) => {
  */
 router.post('/multiple', protect, admin, upload.array('images', 5), async (req, res) => {
   try {
-    if (!req.files || req.files.length === 0) {
+    if (!req.files || req.files?.length === 0) {
       return res.status(400).json({
         success: false,
         message: 'No image files provided',
@@ -83,7 +83,7 @@ router.post('/multiple', protect, admin, upload.array('images', 5), async (req, 
 
     res.json({
       success: true,
-      message: `${req.files.length} images uploaded successfully`,
+      message: `${req.files?.length} images uploaded successfully`,
       images: imageUrls,
     });
   } catch (error) {

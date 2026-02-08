@@ -53,7 +53,7 @@ const getAllProducts = async (req, res, next) => {
     
     res.json({
       success: true,
-      count: products.length,
+      count: products?.length,
       data: products,
     });
   } catch (error) {
@@ -192,7 +192,7 @@ const getProductsByCategory = async (req, res, next) => {
 
     res.json({
       success: true,
-      count: products.length,
+      count: products?.length,
       data: products,
     });
   } catch (error) {
@@ -229,11 +229,11 @@ const createProductReview = async (req, res, next) => {
 
       product.reviews.push(review);
 
-      product.numReviews = product.reviews.length;
+      product.numReviews = product.reviews?.length;
 
       product.rating =
         product.reviews.reduce((acc, item) => item.rating + acc, 0) /
-        product.reviews.length;
+        product.reviews?.length;
 
       await product.save();
       res.status(201).json({ message: 'Review added' });
