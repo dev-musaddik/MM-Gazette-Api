@@ -12,7 +12,7 @@ const requestIp = require('request-ip');
  */
 const createOrder = async (req, res, next) => {
   try {
-    const { items, shippingAddress, deliveryCharge, paymentMethod } = req.body;
+    const { items, shippingAddress, deliveryCharge, paymentMethod, landingPage } = req.body;
 
     if (!items || items?.length === 0) {
       res.status(400);
@@ -24,27 +24,30 @@ const createOrder = async (req, res, next) => {
     const orderItems = [];
 
     for (const item of items) {
-      const product = await Product.findById(item.product);
-      
-      if (!product) {
-        res.status(404);
-        throw new Error(`Product not found: ${item.product}`);
+      let product = null;
+      if (item.product) {
+        product = await Product.findById(item.product);
+        
+        if (!product) {
+          res.status(404);
+          throw new Error(`Product not found: ${item.product}`);
+        }
+
+        // Check stock
+        if (product.stock < item.quantity) {
+          res.status(400);
+          throw new Error(`Insufficient stock for ${product.name}`);
+        }
       }
 
-      // Check stock
-      if (product.stock < item.quantity) {
-        res.status(400);
-        throw new Error(`Insufficient stock for ${product.name}`);
-      }
-
-      const itemTotal = product.basePrice * item.quantity;
+      const itemTotal = (product ? product.basePrice : item.price) * item.quantity;
       totalAmount += itemTotal;
 
       orderItems.push({
-        product: product._id,
-        name: product.name,
+        product: product ? product._id : null,
+        name: product ? product.name : item.name,
         quantity: item.quantity,
-        price: product.basePrice,
+        price: product ? product.basePrice : item.price,
         size: item.size,
         color: item.color,
         material: item.material,
@@ -78,6 +81,7 @@ const createOrder = async (req, res, next) => {
     // Create order
     const order = await Order.create({
       user: req.user._id,
+      landingPage,
       items: orderItems,
       totalAmount: finalTotal,
       deliveryCharge: deliveryCharge || 60,
@@ -111,7 +115,7 @@ const createOrder = async (req, res, next) => {
  */
 const createGuestOrder = async (req, res, next) => {
   try {
-    const { items, shippingAddress, deliveryCharge, paymentMethod } = req.body;
+    const { items, shippingAddress, deliveryCharge, paymentMethod, landingPage } = req.body;
 
     if (!items || items?.length === 0) {
       res.status(400);
@@ -123,27 +127,30 @@ const createGuestOrder = async (req, res, next) => {
     const orderItems = [];
 
     for (const item of items) {
-      const product = await Product.findById(item.product);
-      
-      if (!product) {
-        res.status(404);
-        throw new Error(`Product not found: ${item.product}`);
+      let product = null;
+      if (item.product) {
+        product = await Product.findById(item.product);
+        
+        if (!product) {
+          res.status(404);
+          throw new Error(`Product not found: ${item.product}`);
+        }
+
+        // Check stock
+        if (product.stock < item.quantity) {
+          res.status(400);
+          throw new Error(`Insufficient stock for ${product.name}`);
+        }
       }
 
-      // Check stock
-      if (product.stock < item.quantity) {
-        res.status(400);
-        throw new Error(`Insufficient stock for ${product.name}`);
-      }
-
-      const itemTotal = product.basePrice * item.quantity;
+      const itemTotal = (product ? product.basePrice : item.price) * item.quantity;
       totalAmount += itemTotal;
 
       orderItems.push({
-        product: product._id,
-        name: product.name,
+        product: product ? product._id : null,
+        name: product ? product.name : item.name,
         quantity: item.quantity,
-        price: product.basePrice,
+        price: product ? product.basePrice : item.price,
         size: item.size,
         color: item.color,
         material: item.material,
@@ -169,6 +176,7 @@ const createGuestOrder = async (req, res, next) => {
 
     // Create order without user
     const order = await Order.create({
+      landingPage,
       items: orderItems,
       totalAmount: finalTotal,
       deliveryCharge: deliveryCharge || 60,
@@ -251,6 +259,7 @@ const getAllOrders = async (req, res, next) => {
     const orders = await Order.find({})
       .populate('user', 'name email')
       .populate('items.product')
+      .populate('landingPage', 'title type')
       .sort({ createdAt: -1 });
 
     // Calculate total revenue
@@ -284,7 +293,7 @@ const updateOrderStatus = async (req, res, next) => {
     }
 
     // Check if status is confirmed (processing, shipped, delivered) and stock hasn't been deducted yet
-    const confirmedStatuses = ['processing', 'shipped', 'delivered'];
+    const confirmedStatuses = ['processing', 'shipped', 'delivered', 'completed'];
     
     if (confirmedStatuses.includes(status) && !order.isStockDeducted) {
       // Verify and deduct stock for all items

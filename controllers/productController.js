@@ -101,6 +101,9 @@ const createProduct = async (req, res, next) => {
       specs,
       stock,
       featured,
+      features,
+      demoUrl,
+      status
     } = req.body;
 
     const product = await Product.create({
@@ -113,6 +116,9 @@ const createProduct = async (req, res, next) => {
       specs: specs || {},
       stock: stock || 0,
       featured: featured || false,
+      features: features || [],
+      demoUrl: demoUrl || '',
+      status: status || 'For Sale'
     });
 
     res.status(201).json({

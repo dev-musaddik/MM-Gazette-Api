@@ -1,4 +1,5 @@
 const LandingPage = require('../models/LandingPage');
+const LandingPageLead = require('../models/LandingPageLead');
 
 /**
  * @desc    Create new landing page
@@ -141,6 +142,85 @@ const incrementConversion = async (req, res, next) => {
   }
 };
 
+/**
+ * @desc    Submit a lead from a landing page
+ * @route   POST /api/landing-pages/:id/lead
+ * @access  Public
+ */
+const submitLead = async (req, res, next) => {
+  try {
+    const { name, email, phone, message } = req.body;
+    const landingPageId = req.params.id;
+
+    // Verify LP exists
+    const landingPage = await LandingPage.findById(landingPageId);
+    if (!landingPage) {
+        return res.status(404).json({ message: 'Landing page not found' });
+    }
+
+    const lead = await LandingPageLead.create({
+        landingPage: landingPageId,
+        name,
+        email,
+        phone,
+        message
+    });
+
+    // Also increment conversion since they submitted
+    landingPage.conversions += 1;
+    await landingPage.save();
+
+    res.status(201).json({
+        success: true,
+        message: 'Lead submitted successfully',
+        lead
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @desc    Get all leads (admin)
+ * @route   GET /api/landing-pages/leads/all
+ * @access  Private/Admin
+ */
+const getAllLeads = async (req, res, next) => {
+    try {
+        const leads = await LandingPageLead.find({})
+            .populate('landingPage', 'title slug')
+            .sort({ createdAt: -1 });
+
+        res.json({
+            success: true,
+            count: leads.length,
+            leads
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * @desc    Get landing page by ID (admin)
+ * @route   GET /api/landing-pages/:id
+ * @access  Private/Admin
+ */
+const getLandingPageById = async (req, res, next) => {
+    try {
+        const landingPage = await LandingPage.findById(req.params.id).populate('product');
+        if (!landingPage) {
+            return res.status(404).json({ message: 'Landing page not found' });
+        }
+        res.json({
+            success: true,
+            landingPage
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
 module.exports = {
   createLandingPage,
   getAllLandingPages,
@@ -148,4 +228,7 @@ module.exports = {
   updateLandingPage,
   deleteLandingPage,
   incrementConversion,
+  submitLead,
+  getAllLeads,
+  getLandingPageById
 };

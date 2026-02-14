@@ -29,16 +29,34 @@ const getAllArticles = async (req, res, next) => {
   }
 };
 
+const mongoose = require('mongoose'); // Add mongoose import
+
 /**
- * @desc    Get single article by Slug
+ * @desc    Get single article by Slug or ID
  * @route   GET /api/articles/:slug
  * @access  Public
  */
 const getArticleBySlug = async (req, res, next) => {
   try {
-    const article = await Article.findOne({ slug: req.params.slug });
+    const param = req.params.slug;
+    let article;
+
+    // Check if param is a valid ObjectId
+    if (mongoose.Types.ObjectId.isValid(param)) {
+      console.log(`Searching for article by ID: ${param}`);
+      article = await Article.findById(param);
+      console.log(`Found by ID: ${!!article}`);
+    }
+
+    // If not found by ID (or not an ID), try finding by slug
+    if (!article) {
+      console.log(`Searching for article by slug: ${param}`);
+      article = await Article.findOne({ slug: param });
+      console.log(`Found by slug: ${!!article}`);
+    }
 
     if (!article) {
+      console.log(`Article not found for param: ${param}`);
       res.status(404);
       throw new Error('Article not found');
     }

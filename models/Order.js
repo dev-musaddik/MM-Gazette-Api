@@ -10,11 +10,16 @@ const orderSchema = new mongoose.Schema({
     ref: 'User',
     required: false,
   },
+  landingPage: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'LandingPage',
+    required: false,
+  },
   items: [{
     product: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Product',
-      required: true,
+      required: false, // Allow custom items without product ref
     },
     name: String, // Store product name at time of order
     quantity: {
@@ -79,7 +84,7 @@ const orderSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['pending', 'processing', 'shipped', 'delivered', 'cancelled'],
+    enum: ['pending', 'processing', 'shipped', 'delivered', 'completed', 'cancelled'],
     default: 'pending',
   },
   paymentStatus: {

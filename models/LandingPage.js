@@ -1,77 +1,79 @@
 const mongoose = require('mongoose');
+const slugify = require('slugify');
 
-/**
- * Landing Page Schema
- * For Facebook ad campaigns - standalone product landing pages
- */
-const landingPageSchema = new mongoose.Schema({
-  slug: {
-    type: String,
-    required: [true, 'Please provide a URL slug'],
-    unique: true,
-    lowercase: true,
-    trim: true,
-  },
-  title: {
-    type: String,
-    required: [true, 'Please provide a title'],
-  },
-  product: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Product',
-    required: [true, 'Please select a product'],
-  },
-  
-  // Advertisement Section
-  headline: {
-    type: String,
-    required: [true, 'Please provide a headline'],
-  },
-  subheadline: String,
-  description: {
-    type: String,
-    required: [true, 'Please provide a description'],
-  },
-  features: [String],
-  benefits: [String],
-  images: [String],
-  
-  // Purchase Section
-  specialPrice: Number,
-  originalPrice: Number,
-  discount: Number,
-  urgencyText: String, // e.g., "Only 5 left in stock!"
-  
-  // Settings
-  isActive: {
-    type: Boolean,
-    default: true,
-  },
-  
-  // Analytics
-  views: {
-    type: Number,
-    default: 0,
-  },
-  conversions: {
-    type: Number,
-    default: 0,
-  },
-  
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now,
-  },
+const landingPageSchema = mongoose.Schema({
+    title: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    slug: {
+        type: String,
+        unique: true
+    },
+    heroHeadline: {
+        type: String,
+        required: true
+    },
+    heroSubheadline: {
+        type: String,
+        required: true
+    },
+    heroImage: {
+        type: String,
+        required: true
+    },
+    ctaText: {
+        type: String,
+        required: true,
+        default: 'Get Started'
+    },
+    ctaLink: {
+        type: String,
+        required: true,
+        default: '/contact'
+    },
+    features: [{
+        title: String,
+        description: String,
+        icon: String // e.g., 'Star', 'Shield', 'Zap' - matched on frontend
+    }],
+    trackingCode: {
+        type: String, // For custom scripts like FB Pixel
+        default: ''
+    },
+    isActive: {
+        type: Boolean,
+        default: true
+    },
+    type: {
+        type: String,
+        enum: ['lead', 'sales', 'clickthrough'],
+        default: 'clickthrough'
+    },
+    price: {
+        type: Number,
+        default: 0
+    },
+    product: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Product',
+        required: false
+    }
+}, {
+    timestamps: true
 });
 
-// Update the updatedAt timestamp before saving
+// Middleware to create slug from title if not provided
 landingPageSchema.pre('save', function(next) {
-  this.updatedAt = Date.now();
-  next();
+    if (!this.isModified('title') && !this.isNew) return next();
+
+    if (!this.slug) {
+        this.slug = slugify(this.title, { lower: true, strict: true });
+    }
+    next();
 });
 
-module.exports = mongoose.model('LandingPage', landingPageSchema);
+const LandingPage = mongoose.model('LandingPage', landingPageSchema);
+
+module.exports = LandingPage;

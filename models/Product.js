@@ -28,6 +28,7 @@ const productSchema = new mongoose.Schema({
     required: [true, 'Please provide a base price'],
     min: 0,
   },
+  features: [String], // Array of feature strings
   images: [{
     type: String, // Store image URLs/paths
   }],
@@ -67,6 +68,16 @@ const productSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  demoUrl: String, // URL for live preview
+  status: {
+    type: String,
+    enum: ['For Sale', 'Sold', 'In Development'],
+    default: 'For Sale'
+  },
+  // SEO Metadata
+  seoTitle: String,
+  seoDescription: String,
+  keywords: [String],
   createdAt: {
     type: Date,
     default: Date.now,

@@ -38,6 +38,19 @@ const articleSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  // SEO Fields
+  metaTitle: {
+    type: String,
+    maxLength: 60,
+  },
+  metaDescription: {
+    type: String,
+    maxLength: 160,
+  },
+  keywords: {
+    type: String,
+    default: '',
+  },
 });
 
 // Create slug from title before saving

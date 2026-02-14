@@ -10,7 +10,7 @@ const productRoutes = require('./routes/productRoutes');
 const cartRoutes = require('./routes/cartRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
-const landingPageRoutes = require('./routes/landingPageRoutes');
+const landingRoutes = require('./routes/landingPageRoutes');
 
 // Initialize Express app
 const app = express();
@@ -21,8 +21,8 @@ const app = express();
 
 // Middleware
 app.use(cors()); // Enable CORS for all routes
-app.use(express.json()); // Parse JSON request bodies
-app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
+app.use(express.json({ limit: '50mb' })); // Parse JSON request bodies (increased limit for images)
+app.use(express.urlencoded({ extended: true, limit: '50mb' })); // Parse URL-encoded bodies
 
 // API Routes
 app.use('/api/auth', authRoutes);
@@ -30,11 +30,13 @@ app.use('/api/products', productRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/upload', uploadRoutes); // Cloudinary upload routes
-app.use('/api/landing-pages', landingPageRoutes); // Ad landing pages
+app.use('/api/landing-pages', landingRoutes); // Ad landing pages
 app.use('/api/analytics', require('./routes/analyticsRoutes')); // Analytics routes
 app.use('/api/articles', require('./routes/articleRoutes')); // Blog/News routes
 app.use('/api/categories', require('./routes/categoryRoutes'));
 app.use('/api/brands', require('./routes/brandRoutes'));
+app.use('/api/contacts', require('./routes/contactRoutes'));
+app.use('/api/settings', require('./routes/settingRoutes')); // System Settings
 
 // Health check route
 app.get('/api/health', (req, res) => {
